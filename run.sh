@@ -1,4 +1,5 @@
 #!/bin/bash
+eval $(minikube docker-env --unset)
 
 set -e  # Exit immediately if a command fails
 echo "=== Cleaning and building Maven projects ==="
