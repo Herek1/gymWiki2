@@ -19,6 +19,7 @@ kubectl wait --for=condition=ready pod -l app=client --timeout=60s
 kubectl wait --for=condition=ready pod -l app=server --timeout=60s
 
 echo "=== Launching client in browser ==="
-minikube service client
+URL=$(minikube service client --url)
+echo "🔗 Opening: $URL/Client/site"
+xdg-open "$URL/Client/site"
 
-echo "open manually: http://192.168.49.2:30783/Client/site"
