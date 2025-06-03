@@ -15,7 +15,7 @@ spec:
       containers:
         - name: client
           image: gymwiki2_client:latest
-          imagePullPolicy: Never    
+          imagePullPolicy: Never     
           ports:
             - containerPort: 8080
 

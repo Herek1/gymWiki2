@@ -51,7 +51,7 @@ public class HelloServlet extends HttpServlet {
             layout = Tools.fill(layout, "BODY", "pages/body.html", context);
         }
 
-        if (user.getPrivilege() == -1) {
+        if (user.getPrivilege().equals("demo")) {
             layout = layout.replace("[[LOGOWANIE]]",
                     "<li><a href=\"site?page=logowanie\">Logowanie</a></li>" +
                             "<li><a href=\"site?page=rejestracja\">Rejestracja</a></li>");
@@ -59,9 +59,18 @@ public class HelloServlet extends HttpServlet {
             layout = layout.replace("[[LOGOWANIE]]", "<li><a href=\"site?page=wylogowanie\">Wylogowanie</a></li>");
         }
 
+        if(user.getPrivilege().equals("user")){
+            layout = layout.replace("[[LISTA_CWICZEN]]", Tools.fetchExercises());
+        } else if (user.getPrivilege().equals("admin")) {
+            layout = layout.replace("[[LISTA_CWICZEN]]",
+                    "Link dodaj ćwiczenie");
+        } else {
+            layout = layout.replace("[[LISTA_CWICZEN]]", Tools.fetchDemoExercises());
+
+        }
+
         layout = Tools.fill(layout, "FOOTER", "pages/footer.html", context);
         out.println(layout);
-        System.out.println("you can now go to http://localhost:8080/Client/site");
         out.close();
     }
 
@@ -76,9 +85,9 @@ public class HelloServlet extends HttpServlet {
             session.setAttribute("user", user);
         }
 
-        if (request.getParameter("potwierdzLogin") != null && user.getPrivilege() == -1) {
-            //URL url = new URL("http://localhost:8090/auth");
-            URL url = new URL("http://server:8090/auth");
+        if (request.getParameter("potwierdzLogin") != null && user.getPrivilege().equals("demo")) {
+            URL url = new URL("http://localhost:8090/auth");
+            //URL url = new URL("http://server:8090/auth");
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("POST");
             con.setDoOutput(true);
@@ -91,19 +100,24 @@ public class HelloServlet extends HttpServlet {
 
             InputStream is = con.getInputStream();
             String json = new String(is.readAllBytes());
+            System.out.println("Response from server: " + json);
 
-            if (json.contains("\"privilege\": 1")) {
+            if (json.contains("\"privilege\": \"user\"")) {
                 user.setLogin(login);
-                user.setPrivilege(1);
-            } else if (json.contains("\"privilege\": 2")) {
+                user.setPrivilege("user");
+                System.out.println("User logged in as user");
+            } else if (json.contains("\"privilege\": \"admin\"")) {
                 user.setLogin(login);
-                user.setPrivilege(2);
+                user.setPrivilege("admin");
+                System.out.println("User logged in as admin");
+            }else{
+                System.out.println("Login failed, setting to demo");
             }
         }
 
-        if (request.getParameter("potwierdzWylogowanie") != null && user.getPrivilege() != -1) {
+        if (request.getParameter("potwierdzWylogowanie") != null && user.getPrivilege() != "demo") {
             user.setLogin("");
-            user.setPrivilege(-1);
+            user.setPrivilege("demo");
         }
 
         createPage(request, response);
@@ -112,4 +126,6 @@ public class HelloServlet extends HttpServlet {
 
     public void destroy() {
     }
+
+
 }

@@ -15,7 +15,7 @@ spec:
       containers:
         - name: server
           image: gymwiki2_server:latest
-          imagePullPolicy: Never
+          imagePullPolicy: Never 
           ports:
             - containerPort: 8090
 

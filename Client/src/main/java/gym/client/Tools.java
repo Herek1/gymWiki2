@@ -6,6 +6,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 public class Tools {
@@ -47,4 +49,68 @@ public class Tools {
         }
         return layout.replace("[[" + marker + "]]", out.toString());
     }
+
+    public static String fetchExercises() {
+        try {
+            URL url = new URL("http://localhost:8090/exercises");
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("GET");
+
+            InputStream is = con.getInputStream();
+            String json = new String(is.readAllBytes());
+
+            String jsonArray = json.trim();
+            if (jsonArray.startsWith("[")) jsonArray = jsonArray.substring(1);
+            if (jsonArray.endsWith("]")) jsonArray = jsonArray.substring(0, jsonArray.length() - 1);
+
+            String[] entries = jsonArray.split("\\},\\s*\\{");
+
+            StringBuilder html = new StringBuilder();
+            for (String entry : entries) {
+                entry = entry.replaceAll("[\\[\\]{}]", ""); // remove leftover braces
+                String name = entry.replaceAll(".*\"name\"\\s*:\\s*\"([^\"]+)\".*", "$1");
+                String instr = entry.replaceAll(".*\"instruction\"\\s*:\\s*\"([^\"]+)\".*", "$1");
+                html.append("<tr><td>").append(name).append("</td><td>").append(instr).append("</td></tr>");
+            }
+
+            return "<table><tr><th>Nazwa ćwiczenia</th><th>Opis</th></tr>" + html + "</table>";
+
+        } catch (IOException e) {
+            return "<p>Nie udało się załadować ćwiczeń.</p>";
+        }
+    }
+
+    public static String fetchDemoExercises() {
+        try {
+            URL url = new URL("http://localhost:8090/exercises");
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("GET");
+
+            InputStream is = con.getInputStream();
+            String json = new String(is.readAllBytes());
+
+            String jsonArray = json.trim();
+            if (jsonArray.startsWith("[")) jsonArray = jsonArray.substring(1);
+            if (jsonArray.endsWith("]")) jsonArray = jsonArray.substring(0, jsonArray.length() - 1);
+
+            String[] entries = jsonArray.split("\\},\\s*\\{");
+
+            StringBuilder html = new StringBuilder();
+            for (String entry : entries) {
+                entry = entry.replaceAll("[\\[\\]{}]", ""); // remove leftover braces
+                String name = entry.replaceAll(".*\"name\"\\s*:\\s*\"([^\"]+)\".*", "$1");
+                String instr = entry.replaceAll(".*\"instruction\"\\s*:\\s*\"([^\"]+)\".*", "$1");
+                String demoInstr = instr.length() > 25
+                        ? instr.substring(0, 25) + "... [Zaloguj się, by zobaczyć cały opis]"
+                        : instr;
+                html.append("<tr><td>").append(name).append("</td><td>").append(demoInstr).append("</td></tr>");
+            }
+
+            return "<table><tr><th>Nazwa ćwiczenia</th><th>Opis</th></tr>" + html + "</table>";
+
+        } catch (IOException e) {
+            return "<p>Nie udało się załadować ćwiczeń.</p>";
+        }
+    }
+
 }

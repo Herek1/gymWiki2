@@ -4,7 +4,7 @@ public class TIUser {
     private String login;
     private String password;
     private int age;
-    private int privilege = -1;
+    private String privilege = "demo";
     private String name;
     private String surname;
 
@@ -20,11 +20,11 @@ public class TIUser {
         return password;
     }
 
-    public int getPrivilege() {
+    public String getPrivilege() {
         return privilege;
     }
 
-    public void setPrivilege(int privilege) {
+    public void setPrivilege(String privilege) {
         this.privilege = privilege;
     }
 
