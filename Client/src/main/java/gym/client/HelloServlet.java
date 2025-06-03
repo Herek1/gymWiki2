@@ -101,17 +101,22 @@ public class HelloServlet extends HttpServlet {
             InputStream is = con.getInputStream();
             String json = new String(is.readAllBytes());
             System.out.println("Response from server: " + json);
+            response.setContentType("text/html");
+            PrintWriter out = response.getWriter();
 
             if (json.contains("\"privilege\": \"user\"")) {
                 user.setLogin(login);
                 user.setPrivilege("user");
                 System.out.println("User logged in as user");
+                out.println("<script>alert('You have logged in as USER');</script>");
             } else if (json.contains("\"privilege\": \"admin\"")) {
                 user.setLogin(login);
                 user.setPrivilege("admin");
                 System.out.println("User logged in as admin");
+                out.println("<script>alert('You have logged in as ADMIN');</script>");
             }else{
                 System.out.println("Login failed, setting to demo");
+                out.println("<script>alert('Login failed');</script>");
             }
         }
 
