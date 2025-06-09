@@ -9,6 +9,7 @@ import jakarta.servlet.annotation.*;
 import java.net.URL;
 import java.io.OutputStream;
 import java.io.InputStream;
+import java.util.concurrent.SynchronousQueue;
 
 @WebServlet(name = "helloServlet", urlPatterns = {"/site", "/hello-servlet"})
 
@@ -40,17 +41,39 @@ public class HelloServlet extends HttpServlet {
         String page = request.getParameter("page");
         String layout = Tools.getLayout("index.html", context);
         layout = Tools.fill(layout, "HEADER", "pages/header.html", context);
-
-        if("logowanie".equals(page)) {
-            layout = Tools.fill(layout, "BODY", "pages/login.html", context);
-        }else if ("wylogowanie".equals(page)) {
-            layout = Tools.fill(layout, "BODY", "pages/logout.html", context);
-        }else if("rejestracja".equals(page)) {
-            layout = Tools.fill(layout, "BODY", "pages/rejestracja.html", context);
-        } else {
-            layout = Tools.fill(layout, "BODY", "pages/body.html", context);
+        if (page == null || page.isEmpty()) {
+            page = "body";
         }
 
+        switch (page) {
+            case "logowanie":
+                layout = Tools.fill(layout, "BODY", "pages/login.html", context);
+                break;
+            case "wylogowanie":
+                layout = Tools.fill(layout, "BODY", "pages/logout.html", context);
+                break;
+            case "rejestracja":
+                layout = Tools.fill(layout, "BODY", "pages/rejestracja.html", context);
+                break;
+            case "dodaj_cwiczenie":
+                layout = Tools.fill(layout, "BODY", "pages/dodaj_cwiczenie.html", context);
+                break;
+            default:
+                layout = Tools.fill(layout, "BODY", "pages/body.html", context);
+                break;
+        }
+//        if("logowanie".equals(page)) {
+//            layout = Tools.fill(layout, "BODY", "pages/login.html", context);
+//        }else if ("wylogowanie".equals(page)) {
+//            layout = Tools.fill(layout, "BODY", "pages/logout.html", context);
+//        }else if("rejestracja".equals(page)) {
+//            layout = Tools.fill(layout, "BODY", "pages/rejestracja.html", context);
+//        } else if ("dodaj_cwiczenie".equals(page)) {
+//            layout = Tools.fill(layout, "BODY", "pages/dodaj_cwiczenie.html", context);
+//        } else {
+//            layout = Tools.fill(layout, "BODY", "pages/body.html", context);
+//        }
+//
         if (user.getPrivilege().equals("demo")) {
             layout = layout.replace("[[LOGOWANIE]]",
                     "<li><a href=\"site?page=logowanie\">Logowanie</a></li>" +
@@ -63,7 +86,7 @@ public class HelloServlet extends HttpServlet {
             layout = layout.replace("[[LISTA_CWICZEN]]", Tools.fetchExercises());
         } else if (user.getPrivilege().equals("admin")) {
             layout = layout.replace("[[LISTA_CWICZEN]]",
-                    "Link dodaj ćwiczenie");
+                    "<a href=\"site?page=dodaj_cwiczenie\">Dodaj ćwiczenie</a>");
         } else {
             layout = layout.replace("[[LISTA_CWICZEN]]", Tools.fetchDemoExercises());
 
@@ -87,7 +110,6 @@ public class HelloServlet extends HttpServlet {
 
         if (request.getParameter("potwierdzLogin") != null && user.getPrivilege().equals("demo")) {
             URL url = new URL("http://localhost:8090/auth");
-            //URL url = new URL("http://server:8090/auth");
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("POST");
             con.setDoOutput(true);
@@ -123,6 +145,28 @@ public class HelloServlet extends HttpServlet {
         if (request.getParameter("potwierdzWylogowanie") != null && user.getPrivilege() != "demo") {
             user.setLogin("");
             user.setPrivilege("demo");
+        }
+
+        if (request.getParameter("dodaj_cwiczenie") != null && user.getPrivilege().equals("admin")) {
+            String name = request.getParameter("nazwa");
+            String description = request.getParameter("opis");
+
+            URL url = new URL("http://localhost:8090/exercises");
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("POST");
+            con.setDoOutput(true);
+            con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+
+            String data = "name=" + name + "&description=" + description;
+            try (OutputStream os = con.getOutputStream()) {
+                os.write(data.getBytes());
+            }
+
+            InputStream is = con.getInputStream();
+            String json = new String(is.readAllBytes());
+            System.out.println("Response from server: " + json);
+            response.setContentType("text/html");
+            PrintWriter out = response.getWriter();
         }
 
         createPage(request, response);

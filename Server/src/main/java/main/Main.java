@@ -21,10 +21,6 @@ public class Main {
         UsersDAO newUsersDAO = new UsersDAO(newConnection);
         ExcersiseDAO excersiseDAO = new ExcersiseDAO(newConnection);
 
-        List<HashMap<String, String>> testList = new ArrayList<>();
-        testList = newUsersDAO.getUser("admin123", "admin");
-        System.out.println(testList);
-
         HttpServer server = HttpServer.create(new InetSocketAddress(8090), 0);
         server.createContext("/auth", new AuthHandler(newUsersDAO));
         server.createContext("/exercises", new ExerciseHandler(excersiseDAO));

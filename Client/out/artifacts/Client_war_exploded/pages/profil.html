@@ -1,0 +1,28 @@
+<h2>Witaj w swoim profilu!</h2>
+<p>Twoje dane i ustawienia.</p>
+
+<h3>Kalkulator BMI</h3>
+<label for="waga">Waga (kg):</label>
+<input type="number" id="waga"><br>
+<label for="wzrost">Wzrost (cm):</label>
+<input type="number" id="wzrost"><br>
+<button onclick="obliczBMI()">Oblicz BMI</button>
+<p id="wynikBMI"></p>
+
+<script>
+    function obliczBMI() {
+        const waga = parseFloat(document.getElementById("waga").value);
+        const wzrost = parseFloat(document.getElementById("wzrost").value) / 100;
+        if (waga > 0 && wzrost > 0) {
+            const bmi = waga / (wzrost * wzrost);
+            let kategoria = "";
+            if (bmi < 18.5) kategoria = "niedowaga";
+            else if (bmi < 25) kategoria = "waga prawidłowa";
+            else if (bmi < 30) kategoria = "nadwaga";
+            else kategoria = "otyłość";
+            document.getElementById("wynikBMI").innerText = `Twoje BMI: ${bmi.toFixed(2)} (${kategoria})`;
+        } else {
+            document.getElementById("wynikBMI").innerText = "Podaj poprawne wartości.";
+        }
+    }
+</script>

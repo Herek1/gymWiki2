@@ -30,7 +30,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>main.java.Main</mainClass> <!-- Upewnij się, że to pełna ścieżka do Twojej klasy main -->
+                            <mainClass>main.java.Main</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
