@@ -58,37 +58,33 @@ public class HelloServlet extends HttpServlet {
             case "dodaj_cwiczenie":
                 layout = Tools.fill(layout, "BODY", "pages/dodaj_cwiczenie.html", context);
                 break;
+            case "zarzadzaj_uzytkownikami":
+                layout = Tools.fill(layout, "BODY", "pages/zarzadzaj_uzytkownikami.html", context);
+                break;
             default:
                 layout = Tools.fill(layout, "BODY", "pages/body.html", context);
                 break;
         }
-//        if("logowanie".equals(page)) {
-//            layout = Tools.fill(layout, "BODY", "pages/login.html", context);
-//        }else if ("wylogowanie".equals(page)) {
-//            layout = Tools.fill(layout, "BODY", "pages/logout.html", context);
-//        }else if("rejestracja".equals(page)) {
-//            layout = Tools.fill(layout, "BODY", "pages/rejestracja.html", context);
-//        } else if ("dodaj_cwiczenie".equals(page)) {
-//            layout = Tools.fill(layout, "BODY", "pages/dodaj_cwiczenie.html", context);
-//        } else {
-//            layout = Tools.fill(layout, "BODY", "pages/body.html", context);
-//        }
-//
+
         if (user.getPrivilege().equals("demo")) {
             layout = layout.replace("[[LOGOWANIE]]",
-                    "<li><a href=\"site?page=logowanie\">Logowanie</a></li>" +
-                            "<li><a href=\"site?page=rejestracja\">Rejestracja</a></li>");
+                    "<a href=\"site?page=logowanie\">Logowanie</a>" +
+                            "<a href=\"site?page=rejestracja\">Rejestracja</a>");
         } else {
             layout = layout.replace("[[LOGOWANIE]]", "<li><a href=\"site?page=wylogowanie\">Wylogowanie</a></li>");
         }
-
-        if(user.getPrivilege().equals("user")){
-            layout = layout.replace("[[LISTA_CWICZEN]]", Tools.fetchExercises());
-        } else if (user.getPrivilege().equals("admin")) {
-            layout = layout.replace("[[LISTA_CWICZEN]]",
-                    "<a href=\"site?page=dodaj_cwiczenie\">Dodaj ćwiczenie</a>");
+        if (user.getPrivilege().equals("admin")) {
+            layout = layout.replace("[[ADMIN_LINKS]]", "" +
+                    "<a href=\"site?page=dodaj_cwiczenie\">Dodaj ćwiczenie</a>" +
+                    "<a href=\"site?page=zarzadzaj_uzytkownikami\">Zarządzaj użytkownikami</a>");
         } else {
+            layout = layout.replace("[[ADMIN_LINKS]]", "");
+        }
+
+        if(user.getPrivilege().equals("demo")){
             layout = layout.replace("[[LISTA_CWICZEN]]", Tools.fetchDemoExercises());
+        } else {
+            layout = layout.replace("[[LISTA_CWICZEN]]", Tools.fetchExercises());
 
         }
 
@@ -109,37 +105,7 @@ public class HelloServlet extends HttpServlet {
         }
 
         if (request.getParameter("potwierdzLogin") != null && user.getPrivilege().equals("demo")) {
-            URL url = new URL("http://localhost:8090/auth");
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("POST");
-            con.setDoOutput(true);
-            con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-
-            String data = "login=" + login + "&password=" + password;
-            try (OutputStream os = con.getOutputStream()) {
-                os.write(data.getBytes());
-            }
-
-            InputStream is = con.getInputStream();
-            String json = new String(is.readAllBytes());
-            System.out.println("Response from server: " + json);
-            response.setContentType("text/html");
-            PrintWriter out = response.getWriter();
-
-            if (json.contains("\"privilege\": \"user\"")) {
-                user.setLogin(login);
-                user.setPrivilege("user");
-                System.out.println("User logged in as user");
-                out.println("<script>alert('You have logged in as USER');</script>");
-            } else if (json.contains("\"privilege\": \"admin\"")) {
-                user.setLogin(login);
-                user.setPrivilege("admin");
-                System.out.println("User logged in as admin");
-                out.println("<script>alert('You have logged in as ADMIN');</script>");
-            }else{
-                System.out.println("Login failed, setting to demo");
-                out.println("<script>alert('Login failed');</script>");
-            }
+            RequestHandler.handleLogin(response, login, password, user);
         }
 
         if (request.getParameter("potwierdzWylogowanie") != null && user.getPrivilege() != "demo") {
@@ -148,25 +114,16 @@ public class HelloServlet extends HttpServlet {
         }
 
         if (request.getParameter("dodaj_cwiczenie") != null && user.getPrivilege().equals("admin")) {
-            String name = request.getParameter("nazwa");
-            String description = request.getParameter("opis");
+            RequestHandler.addExercise(request, response);
+        }
 
-            URL url = new URL("http://localhost:8090/exercises");
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("POST");
-            con.setDoOutput(true);
-            con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+        if (request.getParameter("dodajUzytkownika") != null && user.getPrivilege().equals("admin")) {
+            RequestHandler.addUser(request, response);
+        }
 
-            String data = "name=" + name + "&description=" + description;
-            try (OutputStream os = con.getOutputStream()) {
-                os.write(data.getBytes());
-            }
-
-            InputStream is = con.getInputStream();
-            String json = new String(is.readAllBytes());
-            System.out.println("Response from server: " + json);
-            response.setContentType("text/html");
-            PrintWriter out = response.getWriter();
+        if (request.getParameter("usunUzytkownika") != null && user.getPrivilege().equals("admin")) {
+            System.out.println("Removing user");
+            RequestHandler.removeUser(request, response);
         }
 
         createPage(request, response);

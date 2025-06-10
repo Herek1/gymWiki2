@@ -18,11 +18,13 @@ public class Main {
         database.Engine myEngine = new database.Engine();
         myEngine.start();
         Connection newConnection = myEngine.returnConnection();
+        UsersDAO authDao = new UsersDAO(newConnection);
         UsersDAO newUsersDAO = new UsersDAO(newConnection);
         ExcersiseDAO excersiseDAO = new ExcersiseDAO(newConnection);
 
         HttpServer server = HttpServer.create(new InetSocketAddress(8090), 0);
-        server.createContext("/auth", new AuthHandler(newUsersDAO));
+        server.createContext("/auth", new AuthHandler(authDao));
+        server.createContext("/users", new UserHandler(newUsersDAO));
         server.createContext("/exercises", new ExerciseHandler(excersiseDAO));
         server.setExecutor(null);
         System.out.println("Login server running on http://localhost:8090/");

@@ -19,7 +19,7 @@ public class AuthHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        System.out.println("===== Incoming Request =====");
+        System.out.println("===== Incoming Request Auth=====");
         System.out.println("Method: " + exchange.getRequestMethod());
 
         if (!exchange.getRequestMethod().equalsIgnoreCase("POST")) {

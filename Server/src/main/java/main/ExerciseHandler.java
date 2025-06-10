@@ -21,10 +21,8 @@ public class ExerciseHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         String method = exchange.getRequestMethod();
-        String body = new String(exchange.getRequestBody().readAllBytes());
-        System.out.println("===== Incoming Request =====");
-        System.out.println("Method: " + method);
-        System.out.println("Raw body: " + body);
+        //System.out.println("===== Incoming Request Exercise =====");
+        //System.out.println("Method: " + method);
 
         switch (method) {
             case "GET":
@@ -36,7 +34,7 @@ public class ExerciseHandler implements HttpHandler {
             default:
                 exchange.sendResponseHeaders(405, -1); // Method Not Allowed
         }
-        System.out.println("===== Response Sent =====");
+        //System.out.println("===== Response Sent =====");
     }
 
     private void handleGet(HttpExchange exchange) throws IOException {
@@ -60,6 +58,8 @@ public class ExerciseHandler implements HttpHandler {
 
     private void handlePost(HttpExchange exchange) throws IOException {
         String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+        //System.out.println("Raw body: " + body);
+
         Map<String, String> formData = parseFormData(body);
 
         String name = formData.getOrDefault("name", "");
@@ -67,20 +67,17 @@ public class ExerciseHandler implements HttpHandler {
         String response;
         if (!name.isEmpty() && !description.isEmpty()) {
             System.out.println("Adding exercise: " + name + " - " + description);
-            //add to db dao
+            // add to db here
             response = "{\"status\":\"ok\"}";
-            exchange.sendResponseHeaders(200, response.length());
-            try (OutputStream os = exchange.getResponseBody()) {
-                os.write(response.getBytes());
-            }
+            exchange.sendResponseHeaders(200, response.getBytes().length);
         } else {
             response = "{\"status\":\"fail\", \"reason\":\"Missing fields\"}";
-            exchange.sendResponseHeaders(400, response.length());
-            try (OutputStream os = exchange.getResponseBody()) {
-                os.write(response.getBytes());
-            }
+            exchange.sendResponseHeaders(400, response.getBytes().length);
         }
-        System.out.println("Response sent: " + response);
+        try (OutputStream os = exchange.getResponseBody()) {
+            os.write(response.getBytes());
+        }
+        //System.out.println("Response sent: " + response);
     }
 
     private Map<String, String> parseFormData(String form) {
