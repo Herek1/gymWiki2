@@ -122,9 +122,13 @@ public class HelloServlet extends HttpServlet {
         }
 
         if (request.getParameter("usunUzytkownika") != null && user.getPrivilege().equals("admin")) {
-            System.out.println("Removing user");
             RequestHandler.removeUser(request, response);
         }
+
+        if (request.getParameter("rejestracjaUzytkownika") != null && user.getPrivilege().equals("demo")) {
+            RequestHandler.registerUser(request, response);
+        }
+
 
         createPage(request, response);
     }

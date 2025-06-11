@@ -90,6 +90,7 @@ public class RequestHandler {
         PrintWriter out = response.getWriter();
         if( json.contains("\"status\": \"ok\"")) {
             System.out.println("User added successfully");
+            out.println("<script>alert('Added user: " + login + "');</script>");
         } else {
             System.out.println("Failed to add user");
             out.println("<script>alert('Failed to add user: " + login + "');</script>");
@@ -99,9 +100,10 @@ public class RequestHandler {
     public static void removeUser(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String login = request.getParameter("usun_login");
 
-        URL url = new URL("http://localhost:8090/users");
+        URL url = new URL("http://localhost:8090/users?login=" + login);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("DELETE");
+        con.setDoOutput(false);
 
         int status = con.getResponseCode();
         InputStream is = (status >= 400) ? con.getErrorStream() : con.getInputStream();
@@ -116,6 +118,44 @@ public class RequestHandler {
         } else {
             System.out.println("User deletion failed");
             out.println("<script>alert('Failed to delete user: " + login + "');</script>");
+        }
+    }
+
+    public static void registerUser(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String login = request.getParameter("username");
+        String password = request.getParameter("password");
+        String password2 = request.getParameter("password2");
+        PrintWriter out = response.getWriter();
+
+
+        if (login == null || password == null || password2 == null || !password.equals(password2)) {
+            out.println("<script>alert('Failed to register user: " + login + "');</script>");
+            return;
+        }
+
+        URL url = new URL("http://localhost:8090/users");
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("PUT");
+        con.setDoOutput(true);
+        con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+
+        String data = "login=" + login + "&password=" + password;
+        try (OutputStream os = con.getOutputStream()) {
+            os.write(data.getBytes());
+        }
+
+        InputStream is = con.getInputStream();
+        String json = new String(is.readAllBytes());
+        System.out.println("Response from server: " + json);
+        response.setContentType("text/html");
+
+
+        if (json.contains("\"status\": \"ok\"")) {
+            System.out.println("User registered successfully");
+            out.println("<script>alert('User registered successfully: " + login + "');</script>");
+        } else {
+            System.out.println("User registration failed");
+            out.println("<script>alert('Failed to register user: " + login + "');</script>");
         }
     }
 }

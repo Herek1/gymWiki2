@@ -31,6 +31,9 @@ public class UserHandler implements HttpHandler {
             case "POST":
                 handlePost(exchange);
                 break;
+            case "PUT":
+                handlePut(exchange);
+            break;
             default:
                 exchange.sendResponseHeaders(405, -1); // Method Not Allowed
         }
@@ -38,36 +41,55 @@ public class UserHandler implements HttpHandler {
     }
 
     private void handleDelete(HttpExchange exchange) throws IOException {
-        String body = new String(exchange.getRequestBody().readAllBytes());
-        System.out.println("Raw body: " + body);
+        String query = exchange.getRequestURI().getQuery();
+        String login = "";
 
-        Boolean deleted = true;
-        String response;
-        if (deleted) {
-            System.out.println("User deleted successfully");
-            response = "{\"status\": \"ok\"}";
-        } else {
-            System.out.println("User deletion failed");
-            response = "{\"status\": \"fail\"}";
+        if (query != null) {
+            for (String param : query.split("&")) {
+                String[] kv = param.split("=");
+                if (kv.length == 2 && kv[0].equals("login")) {
+                    login = kv[1];
+                }
+            }
         }
+
+        System.out.println("Delete request for login: " + login);
+        List<HashMap<String, String>> result = newUsersDAO.deleteUser(login);
+        System.out.println("Delete result: " + result);
+        boolean deleted = result.size() > 1 && "Success".equalsIgnoreCase(result.get(1).get("status"));
+
+        String response = deleted
+                ? "{\"status\": \"ok\"}"
+                : "{\"status\": \"fail\"}";
 
         exchange.getResponseHeaders().set("Content-Type", "application/json");
         exchange.sendResponseHeaders(200, response.getBytes().length);
-        try (var os = exchange.getResponseBody()) {
+        try (OutputStream os = exchange.getResponseBody()) {
             os.write(response.getBytes());
         }
     }
+
 
     private void handlePost(HttpExchange exchange) throws IOException {
         String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
         System.out.println("Raw body: " + body);
 
+        String[] parts = body.split("&");
+        String login = "";
+        String password = "";
+        String userType = "";
 
-        String name = "test";
+        for (String part : parts) {
+            String[] kv = part.split("=");
+            if (kv.length == 2) {
+                if (kv[0].equals("login")) login = kv[1];
+                if (kv[0].equals("password")) password = kv[1];
+                if (kv[0].equals("userType")) userType = kv[1];
+            }
+        }
         String response;
-        if (!name.isEmpty()) {
-            System.out.println("Adding exercise: " + name);
-            // add to db here
+        if (!login.isEmpty() && !password.isEmpty() && !userType.isEmpty()) {
+            newUsersDAO.createUser(login, password, userType, "", "");
             response = "{\"status\": \"ok\"}";
             exchange.sendResponseHeaders(200, response.getBytes().length);
         } else {
@@ -78,5 +100,40 @@ public class UserHandler implements HttpHandler {
             os.write(response.getBytes());
         }
         System.out.println("Response sent: " + response);
+    }
+
+    private void handlePut(HttpExchange exchange) throws IOException {
+        String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+        System.out.println("Raw body: " + body);
+
+        String[] parts = body.split("&");
+        String login = "";
+        String password = "";
+
+        for (String part : parts) {
+            String[] kv = part.split("=");
+            if (kv.length == 2) {
+                if (kv[0].equals("login")) login = kv[1];
+                if (kv[0].equals("password")) password = kv[1];
+            }
+        }
+
+        System.out.println("Parsed login: " + login);
+        System.out.println("Parsed new password: " + password);
+
+        List<HashMap<String, String>> result = newUsersDAO.createUser(login, password, "user", "", "");
+        System.out.println("Update result: " + result);
+
+        boolean updated = result.size() > 0 && "Success".equalsIgnoreCase(result.get(0).get("status"));
+
+        String response = updated
+                ? "{\"status\": \"ok\"}"
+                : "{\"status\": \"fail\"}";
+
+        exchange.getResponseHeaders().set("Content-Type", "application/json");
+        exchange.sendResponseHeaders(200, response.getBytes().length);
+        try (OutputStream os = exchange.getResponseBody()) {
+            os.write(response.getBytes());
+        }
     }
 }

@@ -8,11 +8,14 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ExerciseHandler implements HttpHandler {
     private final ExcersiseDAO excersiseDAO;
+    List<HashMap<String, String>> exercises = new ArrayList<>();
 
     public ExerciseHandler(ExcersiseDAO excersiseDAO) {
         this.excersiseDAO = excersiseDAO;
@@ -38,22 +41,34 @@ public class ExerciseHandler implements HttpHandler {
     }
 
     private void handleGet(HttpExchange exchange) throws IOException {
-        // In the future, you can differentiate types of GET via query params
-        // String query = exchange.getRequestURI().getQuery();
+        List<HashMap<String, String>> exercises = excersiseDAO.getAllExcersises();
+        System.out.println("Retrieved exercises: " + exercises);
 
-        String jsonResponse = """
-        [
-            {"name": "Squat", "instruction": "Stand with feet shoulder-width apart and bend knees."},
-            {"name": "Bench Press", "instruction": "Lie on bench, lower bar to chest, push back up."},
-            {"name": "Deadlift", "instruction": "Lift bar from ground to hips while keeping back straight."}
-        ]
-        """;
+        StringBuilder jsonBuilder = new StringBuilder();
+        jsonBuilder.append("[");
+
+        for (int i = 0; i < exercises.size()-1; i++) {
+            Map<String, String> ex = exercises.get(i);
+            String name = ex.getOrDefault("name", "").replace("\"", "\\\"");
+            String description = ex.getOrDefault("description", "").replace("\"", "\\\"");
+            jsonBuilder.append("{\"name\": \"").append(name).append("\", ");
+            jsonBuilder.append("\"instruction\": \"").append(description).append("\"}");
+            if (i != exercises.size() - 1) {
+                jsonBuilder.append(", ");
+            }
+        }
+
+        jsonBuilder.append("]");
+
+        String jsonResponse = jsonBuilder.toString();
 
         exchange.getResponseHeaders().set("Content-Type", "application/json");
         exchange.sendResponseHeaders(200, jsonResponse.getBytes().length);
         try (OutputStream os = exchange.getResponseBody()) {
             os.write(jsonResponse.getBytes());
         }
+
+        System.out.println("Response sent: " + jsonResponse);
     }
 
     private void handlePost(HttpExchange exchange) throws IOException {
@@ -66,8 +81,7 @@ public class ExerciseHandler implements HttpHandler {
         String description = formData.getOrDefault("description", "");
         String response;
         if (!name.isEmpty() && !description.isEmpty()) {
-            System.out.println("Adding exercise: " + name + " - " + description);
-            // add to db here
+            excersiseDAO.createExcersise(name, description);
             response = "{\"status\":\"ok\"}";
             exchange.sendResponseHeaders(200, response.getBytes().length);
         } else {
