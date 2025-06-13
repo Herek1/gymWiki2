@@ -1,28 +1,124 @@
-<h2>Witaj w swoim profilu!</h2>
-<p>Twoje dane i ustawienia.</p>
+<main class="container">
+    <section class="hero">
+        <h1>Twój Profil</h1>
+        <p>Oblicz swoje wskaźniki sportowe. Poniżej znajdziesz krótkie opisy:</p>
+    </section>
 
-<h3>Kalkulator BMI</h3>
-<label for="waga">Waga (kg):</label>
-<input type="number" id="waga"><br>
-<label for="wzrost">Wzrost (cm):</label>
-<input type="number" id="wzrost"><br>
-<button onclick="obliczBMI()">Oblicz BMI</button>
-<p id="wynikBMI"></p>
+    <section class="card">
+        <h2>BMI</h2>
+        <li><strong>BMI</strong>Wskaźnik masy ciała, określa relację wagi do wzrostu.</li>
+        <input type="number" id="weight" placeholder="Waga (kg)">
+        <input type="number" id="height" placeholder="Wzrost (cm)">
+        <button onclick="calculateBMI()">Oblicz BMI</button>
+        <p id="bmi-result"></p>
+    </section>
 
-<script>
-    function obliczBMI() {
-        const waga = parseFloat(document.getElementById("waga").value);
-        const wzrost = parseFloat(document.getElementById("wzrost").value) / 100;
-        if (waga > 0 && wzrost > 0) {
-            const bmi = waga / (wzrost * wzrost);
-            let kategoria = "";
-            if (bmi < 18.5) kategoria = "niedowaga";
-            else if (bmi < 25) kategoria = "waga prawidłowa";
-            else if (bmi < 30) kategoria = "nadwaga";
-            else kategoria = "otyłość";
-            document.getElementById("wynikBMI").innerText = `Twoje BMI: ${bmi.toFixed(2)} (${kategoria})`;
-        } else {
-            document.getElementById("wynikBMI").innerText = "Podaj poprawne wartości.";
+    <section class="card">
+        <h2>BMR</h2>
+        <li><strong>BMR</strong> – Podstawowa przemiana materii, ile kcal spalasz w spoczynku.</li>
+        <input type="number" id="bmr-weight" placeholder="Waga (kg)">
+        <input type="number" id="bmr-height" placeholder="Wzrost (cm)">
+        <input type="number" id="bmr-age" placeholder="Wiek">
+        <select id="bmr-sex">
+            <option value="male">Mężczyzna</option>
+            <option value="female">Kobieta</option>
+        </select>
+        <button onclick="calculateBMR()">Oblicz BMR</button>
+        <p id="bmr-result"></p>
+    </section>
+
+    <section class="card">
+        <h2>FFMI</h2>
+        <li><strong>FFMI</strong> – Indeks beztłuszczowej masy ciała, ocenia umięśnienie bez tłuszczu.</li>
+        <input type="number" id="ffmi-weight" placeholder="Waga (kg)">
+        <input type="number" id="ffmi-height" placeholder="Wzrost (cm)">
+        <input type="number" id="ffmi-bodyfat" placeholder="Tkanka tłuszczowa (%)">
+        <button onclick="calculateFFMI()">Oblicz FFMI</button>
+        <p id="ffmi-result"></p>
+    </section>
+
+    <section class="card">
+        <h2>TDEE</h2>
+        <li><strong>TDEE</strong> – Całkowite dzienne zapotrzebowanie kaloryczne w zależności od aktywności.</li>
+        <input type="number" id="tdee-bmr" placeholder="Twoje BMR">
+        <select id="tdee-activity">
+            <option value="1.2">Brak aktywności</option>
+            <option value="1.375">Lekka aktywność</option>
+            <option value="1.55">Umiarkowana aktywność</option>
+            <option value="1.725">Duża aktywność</option>
+            <option value="1.9">Bardzo duża aktywność</option>
+        </select>
+        <button onclick="calculateTDEE()">Oblicz TDEE</button>
+        <p id="tdee-result"></p>
+    </section>
+
+    <section class="card">
+        <h2>Wilks Score</h2>
+        <li><strong>Wilks Score</strong> – Porównuje siłę zawodników różnych mas ciała (powerlifting).</li>
+        <input type="number" id="wilks-weight" placeholder="Masa ciała (kg)">
+        <input type="number" id="wilks-lifted" placeholder="Ciężar podniesiony (kg)">
+        <select id="wilks-sex">
+            <option value="male">Mężczyzna</option>
+            <option value="female">Kobieta</option>
+        </select>
+        <button onclick="calculateWilks()">Oblicz Wilks</button>
+        <p id="wilks-result"></p>
+    </section>
+
+    <script>
+        function calculateBMI() {
+            const weight = parseFloat(document.getElementById("weight").value);
+            const height = parseFloat(document.getElementById("height").value) / 100;
+            if (!weight || !height) return alert("Podaj poprawne wartości.");
+            const bmi = weight / (height * height);
+            let result = `BMI: ${bmi.toFixed(2)} – `;
+            result += bmi < 18.5 ? "niedowaga" : bmi < 25 ? "waga prawidłowa" : bmi < 30 ? "nadwaga" : "otyłość";
+            document.getElementById("bmi-result").textContent = result;
         }
-    }
-</script>
+
+        function calculateBMR() {
+            const weight = parseFloat(document.getElementById("bmr-weight").value);
+            const height = parseFloat(document.getElementById("bmr-height").value);
+            const age = parseFloat(document.getElementById("bmr-age").value);
+            const sex = document.getElementById("bmr-sex").value;
+            if (!weight || !height || !age) return alert("Wprowadź wszystkie dane.");
+            const bmr = sex === "male"
+                ? 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age)
+                : 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
+            document.getElementById("bmr-result").textContent = `BMR: ${bmr.toFixed(2)} kcal`;
+        }
+
+        function calculateFFMI() {
+            const weight = parseFloat(document.getElementById("ffmi-weight").value);
+            const height = parseFloat(document.getElementById("ffmi-height").value) / 100;
+            const bodyfat = parseFloat(document.getElementById("ffmi-bodyfat").value);
+            if (!weight || !height || isNaN(bodyfat)) return alert("Wprowadź wszystkie dane.");
+            const leanMass = weight * (1 - bodyfat / 100);
+            const ffmi = leanMass / (height * height);
+            document.getElementById("ffmi-result").textContent = `FFMI: ${ffmi.toFixed(2)}`;
+        }
+
+        function calculateTDEE() {
+            const bmr = parseFloat(document.getElementById("tdee-bmr").value);
+            const activity = parseFloat(document.getElementById("tdee-activity").value);
+            if (!bmr || !activity) return alert("Wprowadź wszystkie dane.");
+            document.getElementById("tdee-result").textContent = `TDEE: ${(bmr * activity).toFixed(2)} kcal`;
+        }
+
+        function calculateWilks() {
+            const bodyweight = parseFloat(document.getElementById("wilks-weight").value);
+            const lifted = parseFloat(document.getElementById("wilks-lifted").value);
+            const sex = document.getElementById("wilks-sex").value;
+            if (!bodyweight || !lifted) return alert("Wprowadź wszystkie dane.");
+            const coeff = sex === "male"
+                ? [ -216.0475144, 16.2606339, -0.002388645, -0.00113732, 7.01863e-6, -1.291e-8 ]
+                : [ 594.31747775582, -27.23842536447, 0.82112226871, -0.00930733913, 4.731582e-5, -9.054e-8 ];
+            let wilksCoeff = 0;
+            for (let i = 0; i < coeff.length; i++) {
+                wilksCoeff += coeff[i] * Math.pow(bodyweight, i);
+            }
+            const score = (lifted * 500) / wilksCoeff;
+            document.getElementById("wilks-result").textContent = `Wilks Score: ${score.toFixed(2)}`;
+        }
+    </script>
+</main>

@@ -61,6 +61,9 @@ public class HelloServlet extends HttpServlet {
             case "zarzadzaj_uzytkownikami":
                 layout = Tools.fill(layout, "BODY", "pages/zarzadzaj_uzytkownikami.html", context);
                 break;
+            case "profil":
+                layout = Tools.fill(layout, "BODY", "pages/profil.html", context);
+                break;
             default:
                 layout = Tools.fill(layout, "BODY", "pages/body.html", context);
                 break;
@@ -71,7 +74,7 @@ public class HelloServlet extends HttpServlet {
                     "<a href=\"site?page=logowanie\">Logowanie</a>" +
                             "<a href=\"site?page=rejestracja\">Rejestracja</a>");
         } else {
-            layout = layout.replace("[[LOGOWANIE]]", "<li><a href=\"site?page=wylogowanie\">Wylogowanie</a></li>");
+            layout = layout.replace("[[LOGOWANIE]]", "<a href=\"site?page=wylogowanie\">Wylogowanie</a>");
         }
         if (user.getPrivilege().equals("admin")) {
             layout = layout.replace("[[ADMIN_LINKS]]", "" +
@@ -83,8 +86,10 @@ public class HelloServlet extends HttpServlet {
 
         if(user.getPrivilege().equals("demo")){
             layout = layout.replace("[[LISTA_CWICZEN]]", Tools.fetchDemoExercises());
+            layout = layout.replace("[[LOGGED_IN_LINKS]]", "");
         } else {
             layout = layout.replace("[[LISTA_CWICZEN]]", Tools.fetchExercises());
+            layout = layout.replace("[[LOGGED_IN_LINKS]]", "<a href=\"site?page=profil\">Profil</a>");
 
         }
 
