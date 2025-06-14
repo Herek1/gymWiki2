@@ -52,6 +52,7 @@ public class Tools {
 
     public static String fetchExercises() {
         try {
+
             URL url = new URL("http://localhost:8090/exercises");
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
@@ -70,7 +71,22 @@ public class Tools {
                 entry = entry.replaceAll("[\\[\\]{}]", ""); // remove leftover braces
                 String name = entry.replaceAll(".*\"name\"\\s*:\\s*\"([^\"]+)\".*", "$1");
                 String instr = entry.replaceAll(".*\"instruction\"\\s*:\\s*\"([^\"]+)\".*", "$1");
-                html.append("<tr><td>").append(name).append("</td><td>").append(instr).append("</td></tr>");
+                String link;
+                switch (name) {
+                    case "Przysiady":
+                        link = "https://static.strengthlevel.com/images/exercises/squat/squat-400.avif";
+                        break;
+                    case "Podciąganie":
+                        link = "https://static.strengthlevel.com/images/exercises/pull-ups/pull-ups-400.avif";
+                        break;
+                    case "Deska (Plank)":
+                        link = "https://static.strengthlevel.com/images/exercises/ab-wheel-rollout/ab-wheel-rollout-400.avif";
+                        break;
+                    default:
+                        link = "https://static.strengthlevel.com/images/exercises/crunches/crunches-400.avif";
+                }
+                String finalLink = "<img src='" + link + "' alt='" + name + "' style='width: 64px; height: 64px;'>";
+                html.append("<tr><td>").append(name).append("</td><td>").append(instr).append(finalLink).append("</td></tr>");
             }
 
             return "<table><tr><th>Nazwa ćwiczenia</th><th>Opis</th></tr>" + html + "</table>";

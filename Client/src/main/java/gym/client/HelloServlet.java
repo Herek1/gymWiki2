@@ -25,7 +25,7 @@ public class HelloServlet extends HttpServlet {
     }
 
     private void createPage(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        HttpSession session = request.getSession();
+            HttpSession session = request.getSession();
         TIUser user = (TIUser) session.getAttribute("user");
         if (user == null) {
             user = new TIUser();
@@ -89,7 +89,7 @@ public class HelloServlet extends HttpServlet {
         } else {
             layout = layout.replace("[[ADMIN_LINKS]]", "");
         }
-
+        String searchTerm = request.getParameter("szukaj");
         if(user.getPrivilege().equals("demo")){
             layout = layout.replace("[[LISTA_CWICZEN]]", Tools.fetchDemoExercises());
             layout = layout.replace("[[LOGGED_IN_LINKS]]", "");
