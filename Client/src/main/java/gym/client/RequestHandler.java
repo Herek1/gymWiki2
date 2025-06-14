@@ -33,15 +33,13 @@ public class RequestHandler {
             user.setLogin(login);
             user.setPrivilege("user");
             System.out.println("User logged in as user");
-            out.println("<script>alert('You have logged in as USER');</script>");
         } else if (json.contains("\"privilege\": \"admin\"")) {
             user.setLogin(login);
             user.setPrivilege("admin");
             System.out.println("User logged in as admin");
-            out.println("<script>alert('You have logged in as ADMIN');</script>");
         }else{
             System.out.println("Login failed, setting to demo");
-            out.println("<script>alert('Login failed');</script>");
+            out.println("<script>alert('Błędne dane, nie udało się zalogować');</script>");
         }
     }
 
@@ -90,10 +88,10 @@ public class RequestHandler {
         PrintWriter out = response.getWriter();
         if( json.contains("\"status\": \"ok\"")) {
             System.out.println("User added successfully");
-            out.println("<script>alert('Added user: " + login + "');</script>");
+            out.println("<script>alert('Dodano użytkownika: " + login + "');</script>");
         } else {
             System.out.println("Failed to add user");
-            out.println("<script>alert('Failed to add user: " + login + "');</script>");
+            out.println("<script>alert('Nie udało się dodać użytkownika: " + login + "');</script>");
         }
     }
 
@@ -114,10 +112,10 @@ public class RequestHandler {
         PrintWriter out = response.getWriter();
         if (json.contains("\"status\": \"ok\"")) {
             System.out.println("User deleted successfully");
-            out.println("<script>alert('User deleted successfully: " + login + "');</script>");
+            out.println("<script>alert('Usunięto użytkownika: " + login + "');</script>");
         } else {
             System.out.println("User deletion failed");
-            out.println("<script>alert('Failed to delete user: " + login + "');</script>");
+            out.println("<script>alert('Nie udało się usunąć użytkownika: " + login + "');</script>");
         }
     }
 
@@ -129,7 +127,7 @@ public class RequestHandler {
 
 
         if (login == null || password == null || password2 == null || !password.equals(password2)) {
-            out.println("<script>alert('Failed to register user: " + login + "');</script>");
+            out.println("<script>alert('Podane hasła nie są takie same, nie udało się dodać użytkownika: " + login + "');</script>");
             return;
         }
 
@@ -152,10 +150,10 @@ public class RequestHandler {
 
         if (json.contains("\"status\": \"ok\"")) {
             System.out.println("User registered successfully");
-            out.println("<script>alert('User registered successfully: " + login + "');</script>");
+            out.println("<script>alert('Stworzono nowego użytkownika: " + login + "');</script>");
         } else {
             System.out.println("User registration failed");
-            out.println("<script>alert('Failed to register user: " + login + "');</script>");
+            out.println("<script>alert('Nie udało się stworzyć użytkownika: " + login + "');</script>");
         }
     }
 }
