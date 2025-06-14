@@ -26,7 +26,7 @@ public class ExerciseHandler implements HttpHandler {
         String method = exchange.getRequestMethod();
         //System.out.println("===== Incoming Request Exercise =====");
         //System.out.println("Method: " + method);
-
+        System.out.println("Method: " + method + ", Request URI: " + exchange.getRequestURI());
         switch (method) {
             case "GET":
                 handleGet(exchange);
@@ -34,8 +34,13 @@ public class ExerciseHandler implements HttpHandler {
             case "POST":
                 handlePost(exchange);
                 break;
+                case "DELETE":
+                    handleDelete(exchange);
+                    break;
+
             default:
-                exchange.sendResponseHeaders(405, -1); // Method Not Allowed
+                exchange.sendResponseHeaders(405, -1);
+                break;// Method Not Allowed
         }
         //System.out.println("===== Response Sent =====");
     }
@@ -73,25 +78,79 @@ public class ExerciseHandler implements HttpHandler {
 
     private void handlePost(HttpExchange exchange) throws IOException {
         String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-        //System.out.println("Raw body: " + body);
+        System.out.println("Raw body: " + body + ", Request URI: " + exchange.getRequestURI());
 
-        Map<String, String> formData = parseFormData(body);
-
-        String name = formData.getOrDefault("name", "");
-        String description = formData.getOrDefault("description", "");
         String response;
-        if (!name.isEmpty() && !description.isEmpty()) {
-            excersiseDAO.createExcersise(name, description);
-            response = "{\"status\":\"ok\"}";
-            exchange.sendResponseHeaders(200, response.getBytes().length);
-        } else {
-            response = "{\"status\":\"fail\", \"reason\":\"Missing fields\"}";
-            exchange.sendResponseHeaders(400, response.getBytes().length);
+        String name = "";
+        String description = "";
+        String requestType = "";
+        String[] parts = body.split("&");
+        for (String part : parts) {
+            String[] kv = part.split("=");
+            if (kv.length == 2) {
+                if (kv[0].equals("req")) requestType = kv[1];
+                if (kv[0].equals("name")) name = kv[1];
+                if (kv[0].equals("description")) description = kv[1];
+            }
         }
+
+        switch (requestType) {
+            case "add":
+                if (!name.isEmpty() && !description.isEmpty()) {
+                    excersiseDAO.createExcersise(name, description);
+                    response = "{\"status\":\"ok\"}";
+                    exchange.sendResponseHeaders(200, response.getBytes().length);
+                } else {
+                    response = "{\"status\":\"fail\", \"reason\":\"Missing fields\"}";
+                    exchange.sendResponseHeaders(400, response.getBytes().length);
+                }
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(response.getBytes());
+                }
+                break;
+            case "modify":
+                if (!name.isEmpty() && !description.isEmpty()) {
+                    excersiseDAO.updateExcersiseByName(name, name, description);
+                    response = "{\"status\":\"ok\"}";
+                    exchange.sendResponseHeaders(200, response.getBytes().length);
+                } else {
+                    response = "{\"status\":\"fail\", \"reason\":\"Missing fields\"}";
+                    exchange.sendResponseHeaders(400, response.getBytes().length);
+                }
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(response.getBytes());
+                }
+                break;
+            default:
+                response = "{\"status\":\"fail\", \"reason\":\"Invalid request type\"}";
+                exchange.sendResponseHeaders(400, response.getBytes().length);
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(response.getBytes());
+                }
+        }
+    }
+
+    private void handleDelete(HttpExchange exchange) throws IOException {
+        String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+        System.out.println("Raw body: " + body + ", Request URI: " + exchange.getRequestURI());
+
+        String response;
+        String name = "";
+        String[] parts = body.split("&");
+        for (String part : parts) {
+            String[] kv = part.split("=");
+            if (kv.length == 2) {
+                if (kv[0].equals("name")) name = kv[1];
+            }
+        }
+        excersiseDAO.deleteExcersise(name);
+        response = "{\"status\":\"ok\"}";
+        System.out.println("Response: " + response);
+        exchange.getResponseHeaders().set("Content-Type", "application/json");
+        exchange.sendResponseHeaders(200, response.getBytes().length);
         try (OutputStream os = exchange.getResponseBody()) {
             os.write(response.getBytes());
         }
-        //System.out.println("Response sent: " + response);
     }
 
     private Map<String, String> parseFormData(String form) {

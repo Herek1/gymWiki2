@@ -147,5 +147,55 @@ public class UsersDAO extends AbstractDAO {
         return userList;
     }
 
+    public List<HashMap<String, String>> getAllUsers() {
+        String query = "SELECT login, user_type, name, surname FROM users";
+        List<HashMap<String, String>> results = new ArrayList<>();
+
+        HashMap<String, String> staticInfo = new HashMap<>(message.getDefaultErrorMessageAsHashMap());
+
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    HashMap<String, String> record = new HashMap<>();
+                    record.put("login", rs.getString("login"));
+                    record.put("userType", rs.getString("user_type"));
+                    record.put("name", rs.getString("name"));
+                    record.put("surname", rs.getString("surname"));
+                    results.add(record);
+                }
+            }
+        } catch (SQLException e) {
+            staticInfo = errorHandler.handleSQLException(e, staticInfo, message);
+        }
+
+        results.add(staticInfo);
+        return results;
+    }
+
+    public List<HashMap<String, String>> updateUserRole(String login, String newRole) {
+        List<HashMap<String, String>> infoList = new ArrayList<>();
+
+        HashMap<String, String> staticInfo1 = new HashMap<>(message.getDefaultErrorMessageAsHashMap());
+
+        String query = "UPDATE users SET user_type = ? WHERE login = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, newRole);
+            stmt.setString(2, login);
+
+            HashMap<String, String> staticInfo2 = new HashMap<>();
+            if (stmt.executeUpdate() > 0) {
+                staticInfo2.put("success", "true");
+            } else {
+                staticInfo1.replace(message.getHashIdStatus(), "error");
+                staticInfo1.replace(message.getHashIdUserFriendlyError(), "User role was not updated");
+            }
+            infoList.add(staticInfo2);
+        } catch (SQLException e) {
+            staticInfo1 = errorHandler.handleSQLException(e, staticInfo1, message);
+        }
+        infoList.add(staticInfo1);
+        return infoList;
+    }
+
 
 }

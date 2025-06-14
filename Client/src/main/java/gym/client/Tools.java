@@ -80,6 +80,36 @@ public class Tools {
         }
     }
 
+    public static String fetchUsers() {
+        try {
+            URL url = new URL("http://localhost:8090/users");
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("GET");
+
+            InputStream is = con.getInputStream();
+            String json = new String(is.readAllBytes());
+
+            String jsonArray = json.trim();
+            if (jsonArray.startsWith("[")) jsonArray = jsonArray.substring(1);
+            if (jsonArray.endsWith("]")) jsonArray = jsonArray.substring(0, jsonArray.length() - 1);
+
+            String[] entries = jsonArray.split("\\},\\s*\\{");
+
+            StringBuilder html = new StringBuilder();
+            for (String entry : entries) {
+                entry = entry.replaceAll("[\\[\\]{}]", ""); // remove leftover braces
+                String name = entry.replaceAll(".*\"login\"\\s*:\\s*\"([^\"]+)\".*", "$1");
+                String instr = entry.replaceAll(".*\"userType\"\\s*:\\s*\"([^\"]+)\".*", "$1");
+                html.append("<tr><td>").append(name).append("</td><td>").append(instr).append("</td></tr>");
+            }
+
+            return "<table><tr><th>Nazwa użytkownika</th><th>Rola</th></tr>" + html + "</table>";
+
+        } catch (IOException e) {
+            return "<p>Nie udało się załadować userów.</p>";
+        }
+    }
+
     public static String fetchDemoExercises() {
         try {
             URL url = new URL("http://localhost:8090/exercises");

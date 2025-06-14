@@ -1,4 +1,3 @@
-/* === ROOT VARIABLES === */
 :root {
     --blue-50: #eff6ff;
     --blue-100: #dbeafe;
@@ -19,7 +18,6 @@
     --border: #e5e7eb;
 }
 
-/* === GLOBAL STYLES === */
 body {
     font-family: 'Source Sans Pro', sans-serif;
     background: url("1.jpg") no-repeat center center fixed;
@@ -37,7 +35,6 @@ body {
     padding: 0 1rem;
 }
 
-/* === TYPOGRAPHY === */
 h1 {
     font-family: 'Libre Baskerville', serif;
     font-size: 2.5rem;
@@ -51,7 +48,6 @@ p {
     margin: 20px;
 }
 
-/* === NAVIGATION === */
 nav {
     background-color: var(--card-bg);
     border-bottom: 1px solid var(--border);
@@ -107,7 +103,6 @@ nav {
     background-color: var(--primary-hover);
 }
 
-/* === HERO SECTION === */
 .hero {
     text-align: center;
     padding: 3rem 2rem;
@@ -125,7 +120,6 @@ nav {
     margin: 0 auto;
 }
 
-/* === CARD / BOX === */
 .card, form, section {
     background-color: var(--card-bg);
     border: 1px solid var(--border);
@@ -156,7 +150,6 @@ nav {
     margin-bottom: 0.5rem;
 }
 
-/* === FORM === */
 input, textarea, select {
     width: 100%;
     padding: 0.75rem;
@@ -181,7 +174,6 @@ button:hover {
     background-color: var(--primary-hover);
 }
 
-/* === LOGIN FORM === */
 .login-form {
     max-width: 600px;
     margin: 20px auto;
@@ -200,7 +192,6 @@ button:hover {
     border-radius: 8px;
 }
 
-/* === FOOTER === */
 footer {
     text-align: center;
     padding: 1rem;
@@ -208,7 +199,6 @@ footer {
     font-size: 0.9rem;
 }
 
-/* === RESPONSIVE === */
 @media (max-width: 768px) {
     .nav-links, .auth-links {
         flex-direction: column;

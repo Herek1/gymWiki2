@@ -1,7 +1,9 @@
 <main class="container">
     <section>
         <div class="card">
-<h2>Zarządzanie użytkownikami</h2>
+            [[LISTA_UZYTKOWNIKOW]]
+
+            <h2>Zarządzanie użytkownikami</h2>
 
 <h3>Dodaj użytkownika</h3>
 <form method="post" action="?">
@@ -15,6 +17,18 @@
         <option value="admin">Admin</option>
     </select><br>
     <p class="logowanie"><input type="submit" name="dodajUzytkownika" value="Dodaj"></p>
+</form>
+
+<h3>Modyfikuj użytkownika</h3>
+<form method="post" action="?">
+    <label for="login">Login:</label>
+    <input type="text" id="login2" name="login2" required><br>
+    <label for="rola">Nowa rola:</label>
+    <select name="rola2" id="rola2">
+        <option value="user">User</option>
+        <option value="admin">Admin</option>
+    </select><br>
+    <p class="modyfikacja"><input type="submit" name="modyfikujUżytkownika" value="Modyfikuj"></p>
 </form>
 
 <h3>Usuń użytkownika</h3>

@@ -108,4 +108,29 @@ public class ExcersiseDAO extends AbstractDAO {
         return result;
     }
 
+    public List<HashMap<String, String>> deleteExcersise(String name) {
+        List<HashMap<String, String>> result = new ArrayList<>();
+        HashMap<String, String> staticInfo = new HashMap<>(message.getDefaultErrorMessageAsHashMap());
+
+        String query = "DELETE FROM excersise WHERE name = ?";
+
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, name);
+
+            HashMap<String, String> status = new HashMap<>();
+            if (stmt.executeUpdate() > 0) {
+                status.put("success", "true");
+            } else {
+                staticInfo.replace(message.getHashIdStatus(), "error");
+                staticInfo.replace(message.getHashIdUserFriendlyError(), "No excersise found with the given name.");
+            }
+            result.add(status);
+        } catch (SQLException e) {
+            staticInfo = errorHandler.handleSQLException(e, staticInfo, message);
+        }
+
+        result.add(staticInfo);
+        return result;
+    }
+
 }

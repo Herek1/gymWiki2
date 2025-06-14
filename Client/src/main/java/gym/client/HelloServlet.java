@@ -60,9 +60,13 @@ public class HelloServlet extends HttpServlet {
                 break;
             case "zarzadzaj_uzytkownikami":
                 layout = Tools.fill(layout, "BODY", "pages/zarzadzaj_uzytkownikami.html", context);
+                layout = layout.replace("[[LISTA_UZYTKOWNIKOW]]", Tools.fetchUsers());
                 break;
             case "profil":
                 layout = Tools.fill(layout, "BODY", "pages/profil.html", context);
+                break;
+            case "editProfil":
+                layout = Tools.fill(layout, "BODY", "pages/editProfil.html", context);
                 break;
             default:
                 layout = Tools.fill(layout, "BODY", "pages/body.html", context);
@@ -74,11 +78,13 @@ public class HelloServlet extends HttpServlet {
                     "<a href=\"site?page=logowanie\">Logowanie</a>" +
                             "<a href=\"site?page=rejestracja\">Rejestracja</a>");
         } else {
-            layout = layout.replace("[[LOGOWANIE]]", "<a href=\"site?page=wylogowanie\">Wylogowanie</a>");
+            layout = layout.replace("[[LOGOWANIE]]", "" +
+                    "<a href=\"site?page=wylogowanie\">Wylogowanie</a>" +
+                    "<a href=\"site?page=editProfil\">Mój profil</a>");
         }
         if (user.getPrivilege().equals("admin")) {
             layout = layout.replace("[[ADMIN_LINKS]]", "" +
-                    "<a href=\"site?page=dodaj_cwiczenie\">Dodaj ćwiczenie</a>" +
+                    "<a href=\"site?page=dodaj_cwiczenie\">Zarządzaj ćwiczeniami</a>" +
                     "<a href=\"site?page=zarzadzaj_uzytkownikami\">Zarządzaj użytkownikami</a>");
         } else {
             layout = layout.replace("[[ADMIN_LINKS]]", "");
@@ -122,6 +128,14 @@ public class HelloServlet extends HttpServlet {
             RequestHandler.addExercise(request, response);
         }
 
+        if(request.getParameter("modyfikuj_cwiczenie") != null && user.getPrivilege().equals("admin")){
+            RequestHandler.modifyExercise(request, response);
+        }
+
+        if(request.getParameter("usun_cwiczenie") != null && user.getPrivilege().equals("admin")) {
+            RequestHandler.removeExercise(request, response);
+        }
+
         if (request.getParameter("dodajUzytkownika") != null && user.getPrivilege().equals("admin")) {
             RequestHandler.addUser(request, response);
         }
@@ -130,8 +144,20 @@ public class HelloServlet extends HttpServlet {
             RequestHandler.removeUser(request, response);
         }
 
+        if(request.getParameter("modyfikujUżytkownika") != null && user.getPrivilege().equals("admin")) {
+            RequestHandler.editUser(request, response);
+        }
+
         if (request.getParameter("rejestracjaUzytkownika") != null && user.getPrivilege().equals("demo")) {
             RequestHandler.registerUser(request, response);
+        }
+
+        if(request.getParameter("edytujProfil") != null && user.getPrivilege() != "demo"){
+            RequestHandler.editProfile(request, response, user);
+        }
+
+        if(request.getParameter("usunSwojegoUzytkownika") != null && user.getPrivilege() != "demo"){
+            RequestHandler.removeOwnUser(request, response, user);
         }
 
 
